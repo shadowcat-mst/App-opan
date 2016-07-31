@@ -1,0 +1,85 @@
+use strictures 2;
+use Dist::Metadata;
+use File::Open qw(fopen);
+use List::UtilsBy qw(sort_by);
+
+sub packages_header {
+  my ($count) = @_;
+  (my $str = <<"  HEADER") =~ s/^    //mg;
+    File:         02packages.details.txt
+    Description:  Package names found in directory \$CPAN/authors/id/
+    Columns:      package name, version, path
+    Intended-For: Automated fetch routines, namespace documentation.
+    Written-By:   App::opan
+    Line-Count:   ${count}
+    Last-Updated: ${\scalar gmtime} GMT
+
+  HEADER
+  return $str;
+}
+
+sub extract_provides_from_tarball {
+  my ($tarball) = @_;
+  Dist::Metadata->new(file => $tarball)->package_versions;
+}
+
+sub provides_to_packages_entries {
+  my ($path, $provides) = @_;
+  [
+    map +[
+      $_, defined($provides->{$_}) ? $provides->{$_} : 'undef', $path
+    ], sort keys %$provides
+  ]
+}
+
+sub entries_from_packages_file {
+  my ($file) = @_;
+  my $fh = fopen $file;
+  while (my $header = <$fh>) {
+    last if $header =~ /^$/;
+  }
+  my @entries;
+  while (my $line = <$fh>) {
+    chomp($line);
+    push @entries, [ split /\s+/, $line ];
+  }
+  return [ sort_by { $_->[0] } @entries ];
+}
+
+sub merge_packages_entries {
+  my ($base, $merge_these) = @_;
+  return $base unless $merge_these;
+  my @merged;
+  my @to_merge = @$merge_these;
+  foreach my $idx (0..$#$base) {
+    while (@to_merge and $to_merge[0][0] lt $base->[$idx][0]) {
+      push @merged, shift @to_merge;
+    }
+    push @merged, (
+      (@to_merge and $to_merge[0][0] eq $base->[$idx][0])
+        ? shift @to_merge
+        : $base->[$idx]
+    );
+  }
+  push @merged, @to_merge;
+  return \@merged;
+}
+
+sub write_packages_file {
+  my ($file, $entries) = @_;
+  my $fh = fopen $file, 'w';
+  print $fh packages_header(scalar @$entries);
+  local *_ = sub {
+    $_[0].' '.(' ' x ($_[1] - 1 - length $_[0]))
+  };
+  print $fh _($_->[0], 34), _($_->[1], 7), $_->[2], "\n" for @$entries;
+}
+
+my $orig = entries_from_packages_file('data/upstream');
+my $mine = entries_from_packages_file('data/foo');
+
+#write_packages_file('data/out', merge_packages_entries($orig, $mine));
+
+my $catpack = extract_provides_from_tarball('../Catalyst-Runtime/Catalyst-Runtime-5.90103.tar.gz');
+
+write_packages_file('data/foo2', merge_packages_entries($mine, provides_to_packages_entries('M/MY/MY/Catalyst-Runtime-5.90103.tar.gz', $catpack)));
