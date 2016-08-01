@@ -72,9 +72,14 @@ sub write_packages_file {
   my $fh = fopen $file, 'w';
   print $fh packages_header(scalar @$entries);
   local *_ = sub {
-    $_[0].' '.(' ' x ($_[1] - 1 - length $_[0]))
+    my ($one, $two) = (30, 8);
+    if (length($_[0]) > $one) {
+      $one += 8 - length($_[1]);
+      $two = length($_[1]);
+    }
+    sprintf "%-${one}s %${two}s  %s\n", @_;
   };
-  print $fh _($_->[0], 34), _($_->[1], 7), $_->[2], "\n" for @$entries;
+  print $fh _(@$_) for @$entries;
 }
 
 my $orig = entries_from_packages_file('data/upstream');
