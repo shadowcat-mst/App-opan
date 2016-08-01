@@ -25,10 +25,12 @@ sub extract_provides_from_tarball {
 
 sub provides_to_packages_entries {
   my ($path, $provides) = @_;
+  # <@mst> ok, I officially have no idea what order 02packages is actually in
+  # <@rjbs>     $list .= join "", sort {lc $a cmp lc $b} @listing02;
   [
     map +[
       $_, defined($provides->{$_}) ? $provides->{$_} : 'undef', $path
-    ], sort keys %$provides
+    ], sort_by { lc } keys %$provides
   ]
 }
 
@@ -43,7 +45,7 @@ sub entries_from_packages_file {
     chomp($line);
     push @entries, [ split /\s+/, $line ];
   }
-  return [ sort_by { $_->[0] } @entries ];
+  return \@entries;
 }
 
 sub merge_packages_entries {
@@ -52,7 +54,7 @@ sub merge_packages_entries {
   my @merged;
   my @to_merge = @$merge_these;
   foreach my $idx (0..$#$base) {
-    while (@to_merge and $to_merge[0][0] lt $base->[$idx][0]) {
+    while (@to_merge and lc($to_merge[0][0]) lt lc($base->[$idx][0])) {
       push @merged, shift @to_merge;
     }
     push @merged, (
