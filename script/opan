@@ -350,16 +350,26 @@ App::opan - A CPAN overlay for darkpan and pinning purposes
 
 =head1 SYNOPSIS
 
+Set up an opan (creates a directory tree in C<pans/>):
+
   $ opan init
   $ opan pin MSTROUT/M-1.tar.gz
   $ opan add ./My-Dist-1.23.tar.gz
+
+Now, you can start the server:
+
   $ opan daemon -l http://localhost:8030/
   Server available at http://localhost:8030/
 
-Then in another terminal, one of:
+Then in another terminal, run one of:
 
-  $ cpanm --mirror http://localhost:8030/combined/ --mirror-only
+  $ cpanm --mirror http://localhost:8030/combined/ --mirror-only --installdeps .
   $ PERL_CARTON_MIRROR=http://localhost:8030/combined/ carton install
+
+Or, to let opan do that part for you, skip starting the server and run one of:
+
+  $ opan cpanm --installdeps .
+  $ opan carton install
 
 =head1 DESCRIPTION
 
