@@ -193,7 +193,29 @@ sub do_unpin {
   remove_dist_from_index('pans/pinset/index', $dist);
 }
 
-foreach my $cmd (qw(init fetch add unadd pin unpin merge pull)) {
+sub generate_purgelist {
+  my @list;
+  foreach my $pan (qw(pinset custom)) {
+    my %indexed = map +("pans/${pan}/dists/".$_->[2] => 1),
+                    @{entries_from_packages_file("pans/${pan}/index")};
+    foreach my $file (sort glob "pans/${pan}/dists/*/*/*/*") {
+      push @list, $file unless $indexed{$file};
+    }
+  }
+  return @list;
+}
+
+sub do_purgelist {
+  print "$_\n" for &generate_purgelist;
+}
+
+sub do_purge {
+  unlink($_) for &generate_purgelist;
+}
+
+foreach my $cmd (
+  qw(init fetch add unadd pin unpin merge pull purgelist purge)
+) {
   my $pkg = "App::opan::Command::${cmd}";
   my $code = __PACKAGE__->can("do_${cmd}");
   Mojo::Base->import::into($pkg, 'Mojolicious::Command');
@@ -349,6 +371,18 @@ Rebuilds the L</combined> and L</nopin> PANs' index files.
 Does an L</fetch> then an L</merge>. There's no equivalent for others,
 on the assumption what you'll do is roughly L</pin>, L</add>, L</unpin>,
 L</unadd>, ... repeat ..., L</pull>.
+
+=item * purgelist
+
+  opan purgelist
+
+Outputs a list of all non-indexed dists in L</pinset> and L</custom>.
+
+=item * purge
+
+  opan purge
+
+Deletes all files that would have been listed by L</purgelist>.
 
 =item * daemon
 

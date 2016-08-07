@@ -161,6 +161,25 @@ is_deeply(
   'Pinset remove ok'
 );
 
+is(
+  run(purgelist =>),
+  "pans/pinset/dists/M/MS/MSCHWERN/AAAAAAAAA-1.00.tar.gz\n"
+  ."pans/custom/dists/M/MY/MY/M-1.tar.gz\n",
+  'Purgelist ok'
+);
+
+run(purge =>);
+
+ok(
+  !-f $tempdir.'/pans/custom/dists/M/MY/MY/M-1.tar.gz',
+  'Added dist purged from custom'
+);
+
+ok(
+  !-f $tempdir.'/pans/pinset/dists/M/MS/MSCHWERN/AAAAAAAAA-1.00.tar.gz',
+  'Pinned dist purged from pinset'
+);
+
 # 0 for release, 1 for debugging, not allowed to barf
 
 if (1) {
