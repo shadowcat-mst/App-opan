@@ -2,6 +2,8 @@ package App::opan;
 
 use strictures 2;
 
+our $VERSION = '0.001001';
+
 use Dist::Metadata;
 use File::Open qw(fopen);
 use List::UtilsBy qw(sort_by);
