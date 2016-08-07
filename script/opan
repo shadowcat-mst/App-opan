@@ -167,7 +167,8 @@ sub do_add {
   my ($app, $path) = @_;
   my (undef, $dir, $file) = File::Spec->splitpath($path);
   mkpath(my $pan_dir = 'pans/custom/dists/M/MY/MY');
-  copy($path, my $pan_path = File::Spec->catdir($pan_dir, $file));
+  copy($path, my $pan_path = File::Spec->catdir($pan_dir, $file))
+    or die "Failed to copy ${path} into custom pan: $!";
   add_dist_to_index('pans/custom/index', $pan_path);
 }
 
