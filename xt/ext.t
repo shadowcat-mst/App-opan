@@ -3,6 +3,7 @@ use Test::More;
 use File::chdir;
 use File::Path qw(mkpath rmtree);
 use Mojo::Util qw(spurt);
+use Capture::Tiny qw(capture_merged);
 
 my $app = require "./script/opan";
 
@@ -15,9 +16,9 @@ my $orig_dir = $CWD;
   $app->start('init');
   $app->start(add => $orig_dir.'/t/fix/M-1.tar.gz');
   $app->start('merge');
-  $app->start(cpanm => -L => 'cpanm' => -n => 'M');
+  diag(capture_merged { $app->start(cpanm => -L => 'cpanm' => -n => 'M') });
   spurt("requires 'M';\n", 'cpanfile');
-  $app->start(carton => 'install');
+  diag(capture_merged { $app->start(carton => 'install') });
 
   ok(-d 'cpanm');
   ok(-d 'local');
