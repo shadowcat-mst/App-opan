@@ -213,8 +213,49 @@ sub do_purge {
   unlink($_) for &generate_purgelist;
 }
 
+sub run_with_server {
+  my ($app, $run, $pan, @args) = @_;
+  unless (
+    defined($pan) and $pan =~ /^--(combined|nopin|autopin)$/
+  ) {
+    unshift @args, grep defined, $pan;
+    $pan = '--combined';
+  }
+  $pan =~ s/^--//;
+  require Mojo::IOLoop::Server;
+  my $port = Mojo::IOLoop::Server->generate_port;
+  my $url = "http://localhost:${port}/";
+  my $pid = fork();
+  die "fork() fork()ed up: $!" unless defined $pid;
+  unless ($pid) {
+    $app->start(daemon => -l => $url);
+    exit(0);
+  }
+  eval { $run->("${url}${pan}", @args) };
+  my $err = $@;
+  kill TERM => $pid;
+  warn "Run block failed: $err" if $err;
+}
+
+sub do_cpanm {
+  my ($app, @args) = @_;
+  run_with_server($app, sub {
+    my ($mirror, @args) = @_;
+    system(cpanm => '--mirror', $mirror, '--mirror-only', @args);
+  }, @args);
+}
+
+sub do_carton {
+  my ($app, @args) = @_;
+  run_with_server($app, sub {
+    my ($mirror, @args) = @_;
+    local $ENV{PERL_CARTON_MIRROR} = $mirror;
+    system(carton => @args);
+  }, @args);
+}
+
 foreach my $cmd (
-  qw(init fetch add unadd pin unpin merge pull purgelist purge)
+  qw(init fetch add unadd pin unpin merge pull purgelist purge cpanm carton)
 ) {
   my $pkg = "App::opan::Command::${cmd}";
   my $code = __PACKAGE__->can("do_${cmd}");
@@ -417,6 +458,22 @@ L<Mojolicious::Command::prefork>.
   opan get /upstream/modules/02packages.details.txt.gz
 
 Runs a request against the opan URL space using L<Mojolicious::Command::get>.
+
+=item * cpanm
+
+  opan cpanm --installdeps .
+
+Starts a temporary server process and runs
+
+  cpanm --mirror http://localhost:<port>/ --mirror-only <your args here>
+
+=item * carton
+
+  opan carton install
+
+Starts a temporary server process and runs
+
+  PERL_CARTON_MIRROR=http://localhost:<port>/ carton <your args here>
 
 =back
 
