@@ -91,6 +91,76 @@ foreach my $pan (qw(upstream nopin combined)) {
   );
 }
 
+run(pin => 'MSCHWERN/AAAAAAAAA-1.00.tar.gz');
+
+ok(
+  -f $tempdir.'/pans/pinset/dists/M/MS/MSCHWERN/AAAAAAAAA-1.00.tar.gz',
+  'Pinned dist copied into pinset'
+);
+
+is_deeply(
+  entries_for('pinset'),
+  [ [ 'AAAAAAAAA', '1.00', 'M/MS/MSCHWERN/AAAAAAAAA-1.00.tar.gz' ] ],
+  'Pinned dist indexed'
+);
+
+run(add => $test_cwd.'/t/fix/M-1.tar.gz');
+
+ok(
+  -f $tempdir.'/pans/custom/dists/M/MY/MY/M-1.tar.gz',
+  'Added dist copied into custom'
+);
+
+is_deeply(
+  entries_for('custom'),
+  [ [ 'M', '1', 'M/MY/MY/M-1.tar.gz' ] ],
+  'Custom dist indexed'
+);
+
+run(merge =>);
+
+{
+  my %entries = map +($_ => entries_for($_)),
+                  qw(upstream pinset custom nopin combined);
+
+  foreach my $test (
+    [ combined => A_Third_Package => upstream => ],
+    [ nopin => A_Third_Package => upstream => ],
+    [ combined => M => custom => ],
+    [ nopin => M => custom => ],
+    [ combined => AAAAAAAAA => pinset => ],
+    [ nopin => AAAAAAAAA => upstream => ],
+  ) {
+    my ($in_pan, $module, $from_pan) = @$test;
+    is(
+      (grep $_->[0] eq $module, @{$entries{$in_pan}})[0][2],
+      (grep $_->[0] eq $module, @{$entries{$from_pan}})[0][2],
+      "Entry in ${in_pan} for ${module} is from ${from_pan}"
+    );
+  }
+}
+
+run(add => $test_cwd.'/t/fix/M-1.000001.tar.gz');
+
+ok(
+  -f $tempdir.'/pans/custom/dists/M/MY/MY/M-1.000001.tar.gz',
+  'Added dist copied into custom'
+);
+
+is_deeply(
+  entries_for('custom'),
+  [ [ 'M', '1.000001', 'M/MY/MY/M-1.000001.tar.gz' ] ],
+  'Custom dist indexed'
+);
+
+run(unpin => 'AAAAAAAAA-1.00.tar.gz');
+
+is_deeply(
+  entries_for('pinset'),
+  [],
+  'Pinset remove ok'
+);
+
 # 0 for release, 1 for debugging, not allowed to barf
 
 if (1) {
