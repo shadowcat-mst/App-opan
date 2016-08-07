@@ -1,5 +1,6 @@
 Revision history for App-opan
 
+0.001002 - 2016-08-07
   - fix 'make dist' to copy the code into lib/App/opan.pm as well
 
 0.001001 - 2016-08-07
