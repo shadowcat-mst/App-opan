@@ -1,5 +1,7 @@
 Revision history for App-opan
 
+  - I ... forgot ... the shebang line. Fixed.
+
 0.001002 - 2016-08-07
   - fix 'make dist' to copy the code into lib/App/opan.pm as well
 

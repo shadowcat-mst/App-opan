@@ -1,3 +1,5 @@
+#!perl
+
 package App::opan;
 
 use strictures 2;
