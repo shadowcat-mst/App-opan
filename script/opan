@@ -388,7 +388,8 @@ ways. I hope neither, but I can't guarantee that yet.
   opan init
 
 Creates a C<pans/> directory with empty indexes for L</custom> and L</pinset>
-and a fresh index for L</upstream>
+and a fresh index for L</upstream> (i.e. runs L</fetch> for you at the end
+of initialisation).
 
 =head3 fetch
 
