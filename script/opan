@@ -381,6 +381,57 @@ ways. I hope neither, but I can't guarantee that yet.
 
 =head1 DESCRIPTION
 
+Two basic approaches to using this thing. First, if you're using carton, you
+can probably completely ignore the pinning system, so just do:
+
+  $ opan init
+  $ opan add ./My-DarkPan-Dist-1.23.tar.gz
+  $ git add pans/; git commit -m 'fresh opan'
+  $ opan carton install
+
+You can reproduce this install with simply:
+
+  $ opan carton install --deployment
+
+When you want to update to a new version of the cpan index (assuming you
+already have an additional requirement that's too old in your current
+snapshot):
+
+  $ opan pull
+  $ git add pans/; git commit -m 'update pans'
+  $ opan carton install
+
+Second, if you're not using carton, but you want reproducible installs, you
+can still mostly ignore the pinning system by doing:
+
+  $ opan init
+  $ opan add ./My-DarkPan-Dist-1.23.tar.gz
+  $ opan cpanm --autopin --installdeps .
+  $ git add pans/; git commit -m 'opan with current version pinning'
+
+Your reproducible install is now:
+
+  $ opan cpanm --installdeps .
+
+When you want to update to a new version of the cpan index (assuming you
+already have an additional requirement that's too old in your current
+snapshot):
+
+  $ opan pull
+  $ opan cpanm --autopin --installdeps .
+  $ git add pans/; git commit -m 'update pans'
+
+To update a single dist in this system, the easy route is:
+
+  $ opan unpin Thingy-1.23.tar.gz
+  $ opan cpanm Thingy
+  Fetching http://www.cpan.org/authors/id/S/SO/SOMEONE/Thingy-1.25.tar.gz
+  ...
+  $ opan pin SOMEONE/Thing-1.25.tar.gz
+
+This will probably make more sense if you read the L</Commands> and L</PANs>
+documentation following before trying to set things up.
+
 =head2 Commands
 
 =head3 init
