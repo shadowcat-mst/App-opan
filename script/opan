@@ -204,7 +204,7 @@ use Mojolicious::Lite;
 
 push(@{app->commands->namespaces}, 'App::opan::Command');
 
-helper cpan_url => sub { 'http://www.cpan.org/' };
+helper cpan_url => sub { $ENV{OPAN_MIRROR} || 'http://www.cpan.org/' };
 
 my $nopin_static = Mojolicious::Static->new(
   paths => [ 'pans/custom/dists' ]
@@ -231,14 +231,6 @@ foreach my $pan (qw(upstream nopin combined)) {
   };
 }
 
-get "/autopin/modules/02packages.details.txt" => sub {
-  $base_static->serve($_[0], "nopin/index");
-};
-
-get "/autopin/modules/02packages.details.txt.gz" => sub {
-  $base_static->serve($_[0], "nopin/index.gz");
-};
-
 my $serve_upstream = sub {
   my ($c) = @_;
   $c->render_later;
@@ -263,14 +255,24 @@ get '/nopin/authors/id/*path' => sub {
   $nopin_static->dispatch($_[0]) or $serve_upstream->($_[0]);
 };
 
-get '/autopin/authors/id/*path' => sub {
-  return if $nopin_static->dispatch($_[0]);
-  return if eval {
-    do_pin(app);
-    $pinset_static->dispatch($_[0]);
+if ($ENV{OPAN_AUTOPIN}) {
+  get "/autopin/modules/02packages.details.txt" => sub {
+    $base_static->serve($_[0], "nopin/index");
   };
-  return $_[0]->render(text => 'Not found', status => 404);
-};
+  
+  get "/autopin/modules/02packages.details.txt.gz" => sub {
+    $base_static->serve($_[0], "nopin/index.gz");
+  };
+  
+  get '/autopin/authors/id/*path' => sub {
+    return if $nopin_static->dispatch($_[0]);
+    return if eval {
+      do_pin(app);
+      $pinset_static->dispatch($_[0]);
+    };
+    return $_[0]->render(text => 'Not found', status => 404);
+  };
+}
 
 app->start;
 
@@ -407,6 +409,9 @@ Dist files: Fetched from custom, pinset and upstream in that order.
 Virtual PAN with no presence on disk.
 
 Identical to nopin, but fetching a dist from upstream does an implict L</pin>.
+
+Since this can modify your opan config, it's only enabled if the environment
+variable C<OPAN_AUTOPIN> is set to a true value.
 
 =back
 
