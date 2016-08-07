@@ -5,6 +5,17 @@ use File::Path qw(mkpath rmtree);
 use Mojo::Util qw(spurt);
 use Capture::Tiny qw(capture_merged);
 
+delete @ENV{qw(
+  PERL_MM_OPT PERL_MB_OPT
+  PASTHRU PASTHRU_DEFINE PASTHRU_INC
+  PREFIX INSTALL_BASE
+  PERL_LOCAL_LIB_ROOT
+  PERL_CPANM_OPT
+  MAKEFLAGS
+)};
+
+#use Data::Dumper; die Dumper \%ENV;
+
 my $app = require "./script/opan";
 
 my $orig_dir = $CWD;
