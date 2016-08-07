@@ -309,6 +309,18 @@ App::opan - A CPAN overlay for darkpan and pinning purposes
 
 =head1 SYNOPSIS
 
+  $ opan init
+  $ opan pin MSTROUT/M-1.tar.gz
+  $ opan add ./My-Dist-1.23.tar.gz
+  $ opan daemon -l http://localhost:8030/
+  [Sun Aug  7 18:01:20 2016] [info] Listening at "http://localhost:8030/"
+  Server available at http://localhost:8030/
+
+Then in another terminal, one of:
+
+  $ cpanm --mirror http://localhost:8030/combined/ --mirror-only
+  $ PERL_CARTON_MIRROR=http://localhost:8030/combined/ carton install
+
 =head1 DESCRIPTION
 
 =head2 Commands
