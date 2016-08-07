@@ -274,7 +274,7 @@ if ($ENV{OPAN_AUTOPIN}) {
   };
 }
 
-app->start;
+caller() ? app : app->start;
 
 =head1 NAME
 
