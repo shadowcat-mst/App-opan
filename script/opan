@@ -481,7 +481,15 @@ Runs a request against the opan URL space using L<Mojolicious::Command::get>.
 
 Starts a temporary server process and runs
 
-  cpanm --mirror http://localhost:<port>/ --mirror-only <your args here>
+  cpanm --mirror http://localhost:<port>/combined/ --mirror-only <your args here>
+
+Can also be run with one of:
+
+  opan cpanm --nopin <your args here>
+  opan cpanm --autopin <your args here>
+  opan cpanm --combined <your args here>
+
+to request a specific PAN.
 
 =head3 carton
 
@@ -489,7 +497,15 @@ Starts a temporary server process and runs
 
 Starts a temporary server process and runs
 
-  PERL_CARTON_MIRROR=http://localhost:<port>/ carton <your args here>
+  PERL_CARTON_MIRROR=http://localhost:<port>/combined/ carton <your args here>
+
+Can also be run with one of:
+
+  opan carton --nopin <your args here>
+  opan carton --autopin <your args here>
+  opan carton --combined <your args here>
+
+to request a specific PAN.
 
 =head2 PANs
 
