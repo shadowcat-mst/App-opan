@@ -301,7 +301,7 @@ get '/autopin/authors/id/*path' => sub {
   return $_[0]->render(text => 'Not found', status => 404);
 };
 
-caller() ? app : app->start;
+caller() ? app : app->tap(sub { shift->log->level('fatal') })->start;
 
 =head1 NAME
 
@@ -313,7 +313,6 @@ App::opan - A CPAN overlay for darkpan and pinning purposes
   $ opan pin MSTROUT/M-1.tar.gz
   $ opan add ./My-Dist-1.23.tar.gz
   $ opan daemon -l http://localhost:8030/
-  [Sun Aug  7 18:01:20 2016] [info] Listening at "http://localhost:8030/"
   Server available at http://localhost:8030/
 
 Then in another terminal, one of:
