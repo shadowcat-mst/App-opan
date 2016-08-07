@@ -247,10 +247,10 @@ my $base_static = Mojolicious::Static->new(
 
 foreach my $pan (qw(upstream nopin combined)) {
   get "/${pan}/modules/02packages.details.txt" => sub {
-    $base_static->serve($_[0], "${pan}/index");
+    $base_static->dispatch($_[0]->stash(path => "${pan}/index"));
   };
   get "/${pan}/modules/02packages.details.txt.gz" => sub {
-    $base_static->serve($_[0], "${pan}/index.gz");
+    $base_static->dispatch($_[0]->stash(path => "${pan}/index.gz"));
   };
 }
 
@@ -278,24 +278,28 @@ get '/nopin/authors/id/*path' => sub {
   $nopin_static->dispatch($_[0]) or $serve_upstream->($_[0]);
 };
 
-if ($ENV{OPAN_AUTOPIN}) {
-  get "/autopin/modules/02packages.details.txt" => sub {
-    $base_static->serve($_[0], "nopin/index");
+get "/autopin/modules/02packages.details.txt" => sub {
+  return $_[0]->render(text => 'Autopin off', status => 404)
+    unless $ENV{OPAN_AUTOPIN};
+  $base_static->dispatch($_[0]->stash(path => "nopin/index"));
+};
+
+get "/autopin/modules/02packages.details.txt.gz" => sub {
+  return $_[0]->render(text => 'Autopin off', status => 404)
+    unless $ENV{OPAN_AUTOPIN};
+  $base_static->dispatch($_[0]->stash(path => "nopin/index.gz"));
+};
+
+get '/autopin/authors/id/*path' => sub {
+  return $_[0]->render(text => 'Autopin off', status => 404)
+    unless $ENV{OPAN_AUTOPIN};
+  return if $nopin_static->dispatch($_[0]);
+  return if eval {
+    do_pin(app, $_[0]->stash->{path});
+    $pinset_static->dispatch($_[0]);
   };
-  
-  get "/autopin/modules/02packages.details.txt.gz" => sub {
-    $base_static->serve($_[0], "nopin/index.gz");
-  };
-  
-  get '/autopin/authors/id/*path' => sub {
-    return if $nopin_static->dispatch($_[0]);
-    return if eval {
-      do_pin(app);
-      $pinset_static->dispatch($_[0]);
-    };
-    return $_[0]->render(text => 'Not found', status => 404);
-  };
-}
+  return $_[0]->render(text => 'Not found', status => 404);
+};
 
 caller() ? app : app->start;
 

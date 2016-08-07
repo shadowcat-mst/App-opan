@@ -180,6 +180,23 @@ ok(
   'Pinned dist purged from pinset'
 );
 
+{
+  local $ENV{OPAN_AUTOPIN} = 1;
+  is(
+    run(get => '/autopin/modules/02packages.details.txt'),
+    run(get => '/nopin/modules/02packages.details.txt'),
+    'autopin pan provides same index as nopin'
+  );
+
+  run(get => '/autopin/authors/id/M/MS/MSCHWERN/AAAAAAAAA-1.01.tar.gz');
+
+  is_deeply(
+    entries_for('pinset'),
+    [ [ 'AAAAAAAAA', '1.01', 'M/MS/MSCHWERN/AAAAAAAAA-1.01.tar.gz' ] ],
+    'Autopin did, indeed, automatically pin the dist'
+  );
+}
+
 # 0 for release, 1 for debugging, not allowed to barf
 
 if (1) {
