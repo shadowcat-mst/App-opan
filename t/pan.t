@@ -199,7 +199,7 @@ ok(
 
 # 0 for release, 1 for debugging, not allowed to barf
 
-if (1) {
+if (0) {
   warn "Tempdir is $tempdir; hit enter to finish and cleanup\n";
   <STDIN>;
 }
