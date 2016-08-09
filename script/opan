@@ -85,6 +85,8 @@ sub write_packages_file {
   my $fh = fopen $file, 'w';
   print $fh packages_header(scalar @$entries);
   local *_ = sub {
+    # mirroring 'sub rewrite02 {' in lib/PAUSE/mldistwatch.pm
+    # see http://github.com/andk/pause for the whole thing
     my ($one, $two) = (30, 8);
     if (length($_[0]) > $one) {
       $one += 8 - length($_[1]);
