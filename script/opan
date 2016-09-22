@@ -234,6 +234,7 @@ sub run_with_server {
   my $pid = fork();
   die "fork() fork()ed up: $!" unless defined $pid;
   unless ($pid) {
+    $ENV{OPAN_AUTOPIN} = 1 if $pan eq 'autopin';
     $app->start(daemon => -l => $url);
     exit(0);
   }
