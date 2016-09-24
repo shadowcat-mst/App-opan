@@ -1,5 +1,6 @@
 Revision history for App-opan
 
+0.002000 - 2016-09-24
   - set OPAN_AUTOPIN given --autopin to cpanm/carton commands, because you
     already explicitly asked for autopin so it's silly not to
 
