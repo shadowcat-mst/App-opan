@@ -603,7 +603,9 @@ Virtual PAN with no presence on disk.
 Identical to nopin, but fetching a dist from upstream does an implict L</pin>.
 
 Since this can modify your opan config, it's only enabled if the environment
-variable C<OPAN_AUTOPIN> is set to a true value.
+variable C<OPAN_AUTOPIN> is set to a true value (calling the L</cpanm> or
+L</carton> commands with C<--autopin> sets this for you, because you already
+specified you wanted that).
 
 =head1 AUTHOR
 
