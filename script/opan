@@ -144,7 +144,7 @@ sub do_fetch {
         ->res->body,
     'pans/upstream/index.gz';
   spurt
-    +(scalar capture zcat => 'pans/upstream/index.gz'),
+    +(scalar capture(gunzip => -c => 'pans/upstream/index.gz')),
     'pans/upstream/index';
 }
 
