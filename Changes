@@ -1,5 +1,6 @@
 Revision history for App-opan
 
+  - port to new Mojo::File API
   - Changes file actually in dist
 
 0.002000 - 2016-09-24

@@ -2,7 +2,7 @@ use strictures 2;
 use Test::More;
 use File::chdir;
 use File::Path qw(mkpath rmtree);
-use Mojo::Util qw(spurt);
+use Mojo::File qw(path);
 use Capture::Tiny qw(capture_merged);
 
 delete @ENV{qw(
@@ -28,7 +28,7 @@ my $orig_dir = $CWD;
   $app->start(add => $orig_dir.'/t/fix/M-1.tar.gz');
   $app->start('merge');
   diag(capture_merged { $app->start(cpanm => -L => 'cpanm' => -n => 'M') });
-  spurt("requires 'M';\n", 'cpanfile');
+  path('cpanfile')->spurt("requires 'M';\n");
   diag(capture_merged { $app->start(carton => 'install') });
 
   ok(-d 'cpanm');

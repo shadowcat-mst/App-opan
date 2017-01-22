@@ -11,7 +11,8 @@ use File::Open qw(fopen);
 use List::UtilsBy qw(sort_by);
 use File::Path qw(mkpath);
 use IPC::System::Simple qw(capture);
-use Mojo::Util qw(spurt monkey_patch);
+use Mojo::Util qw(monkey_patch);
+use Mojo::File qw(path);
 use File::Spec;
 use File::Copy qw(copy);
 use Import::Into;
@@ -96,9 +97,7 @@ sub write_packages_file {
   };
   print $fh _(@$_) for @$entries;
   close $fh;
-  spurt
-    +(scalar capture(gzip => -c => $file)),
-    "${file}.gz";
+  path("${file}.gz")->spurt(scalar capture(gzip => -c => $file));
 }
 
 sub add_dist_to_index {
@@ -139,13 +138,13 @@ sub do_init {
 
 sub do_fetch {
   my ($app) = @_;
-  spurt
+  path('pans/upstream/index.gz')->spurt(
     $app->ua->get($app->cpan_url.'modules/02packages.details.txt.gz')
-        ->res->body,
-    'pans/upstream/index.gz';
-  spurt
-    +(scalar capture zcat => 'pans/upstream/index.gz'),
-    'pans/upstream/index';
+        ->res->body
+  );
+  path('pans/upstream/index')->spurt(
+    scalar capture zcat => 'pans/upstream/index.gz'
+  );
 }
 
 sub do_merge {
@@ -188,9 +187,9 @@ sub do_pin {
   $path =~ /^(([A-Z])[A-Z])[A-Z]/ and $path = join('/', $2, $1, $path);
   my (undef, $dir, $file) = File::Spec->splitpath($path);
   mkpath("pans/pinset/dists/${dir}");
-  spurt
-    $app->ua->get($app->cpan_url.'authors/id/'.$path)->res->body,
-    my $pan_path = "pans/pinset/dists/${path}";
+  path(my $pan_path = "pans/pinset/dists/${path}")->spurt(
+    $app->ua->get($app->cpan_url.'authors/id/'.$path)->res->body
+  );
   add_dist_to_index('pans/pinset/index', $pan_path);
 }
 
