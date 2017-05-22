@@ -1,5 +1,7 @@
 Revision history for App-opan
 
+  - port the tests to new Mojo::File API as well so it still installs
+
 0.002001 - 2017-01-22
   - port to new Mojo::File API
   - Changes file actually in dist
