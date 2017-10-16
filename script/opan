@@ -14,6 +14,8 @@ use Mojo::Util qw(monkey_patch);
 use Mojo::File qw(path);
 use Import::Into;
 
+my %TOKENS=map { $_=>1 } split/:/, $ENV{OPAN_AUTH_TOKENS} || '';
+
 sub packages_header {
   my ($count) = @_;
   (my $str = <<"  HEADER") =~ s/^    //mg;
@@ -267,6 +269,26 @@ foreach my $cmd (
 }
 
 use Mojolicious::Lite;
+
+post "/upload" => sub {
+  my $c = shift;
+  unless ($TOKENS{$c->req->url->to_abs->password || ""}) {
+    $c->res->headers->www_authenticate("Basic realm=opan");
+    return $c->render(status => 401, text => "Token missing or not found\n");
+  }
+  my $upload = $c->req->upload('dist')
+    or return $c->render(status => 400, text => "dist file missing\n");
+  my $pan_dir = path('pans/custom/dists/M/MY/MY')->make_path;
+  $upload->move_to(my $pan_path = $pan_dir->child($upload->filename))
+    or $c->render(
+    status => 500,
+    text   => "Failed to move ${upload} into custom pan: $!\n"
+    );
+  add_dist_to_index('pans/custom/index', $pan_path);
+  do_merge(app);
+  $c->render(text => "$pan_path Added to opan\n");
+  }
+  if keys %TOKENS;
 
 push(@{app->commands->namespaces}, 'App::opan::Command');
 
@@ -601,6 +623,13 @@ Since this can modify your opan config, it's only enabled if the environment
 variable C<OPAN_AUTOPIN> is set to a true value (calling the L</cpanm> or
 L</carton> commands with C<--autopin> sets this for you, because you already
 specified you wanted that).
+
+=head2 uploads
+
+To enable the /upload endpoint, set the ENV var OPAN_AUTH_TOKENS to a colon
+separated list of accepted tokens for uploads. This will allow a post with a
+'file' upload argument, checking http basic auth password against the provided
+auth tokens.
 
 =head1 AUTHOR
 
