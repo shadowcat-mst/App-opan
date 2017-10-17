@@ -9,12 +9,9 @@ our $VERSION = '0.002002';
 use Dist::Metadata;
 use File::Open qw(fopen);
 use List::UtilsBy qw(sort_by);
-use File::Path qw(mkpath);
 use IPC::System::Simple qw(capture);
 use Mojo::Util qw(monkey_patch);
 use Mojo::File qw(path);
-use File::Spec;
-use File::Copy qw(copy);
 use Import::Into;
 
 sub packages_header {
@@ -130,8 +127,7 @@ my @pan_names = qw(upstream custom pinset combined nopin);
 
 sub do_init {
   my ($app) = @_;
-  mkpath('pans');
-  mkpath("pans/$_/dists") for @pan_names;
+  path("pans/$_/dists")->make_path for @pan_names;
   write_packages_file("pans/$_/index", []) for qw(custom pinset);
   do_pull($app);
 }
@@ -170,9 +166,9 @@ sub do_pull {
 
 sub do_add {
   my ($app, $path) = @_;
-  my (undef, $dir, $file) = File::Spec->splitpath($path);
-  mkpath(my $pan_dir = 'pans/custom/dists/M/MY/MY');
-  copy($path, my $pan_path = File::Spec->catdir($pan_dir, $file))
+  $path=path($path);
+  my $pan_dir = path('pans/custom/dists/M/MY/MY')->make_path;
+  $path->copy_to(my $pan_path = $pan_dir->child($path->basename))
     or die "Failed to copy ${path} into custom pan: $!";
   add_dist_to_index('pans/custom/index', $pan_path);
 }
@@ -185,9 +181,9 @@ sub do_unadd {
 sub do_pin {
   my ($app, $path) = @_;
   $path =~ /^(([A-Z])[A-Z])[A-Z]/ and $path = join('/', $2, $1, $path);
-  my (undef, $dir, $file) = File::Spec->splitpath($path);
-  mkpath("pans/pinset/dists/${dir}");
-  path(my $pan_path = "pans/pinset/dists/${path}")->spurt(
+  $path=path($path);
+  path("pans/pinset/dists/")->child($path->dirname)->make_path;
+  my $pan_path=path("pans/pinset/dists/${path}")->spurt(
     $app->ua->get($app->cpan_url.'authors/id/'.$path)->res->body
   );
   add_dist_to_index('pans/pinset/index', $pan_path);
