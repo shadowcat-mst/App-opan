@@ -270,6 +270,8 @@ foreach my $cmd (
 
 use Mojolicious::Lite;
 
+Mojo::IOLoop->recurring(600 => sub { do_pull(app); });
+
 post "/upload" => sub {
   my $c = shift;
   unless ($TOKENS{$c->req->url->to_abs->password || ""}) {
