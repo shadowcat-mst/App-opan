@@ -276,7 +276,7 @@ post "/upload" => sub {
     $c->res->headers->www_authenticate("Basic realm=opan");
     return $c->render(status => 401, text => "Token missing or not found\n");
   }
-  my $upload = $c->req->upload('dist')
+  my $upload = $c->req->upload('dist') || $c->req->upload('pause99_add_uri_httpupload')
     or return $c->render(status => 400, text => "dist file missing\n");
   my $pan_dir = path('pans/custom/dists/M/MY/MY')->make_path;
   $upload->move_to(my $pan_path = $pan_dir->child($upload->filename))
