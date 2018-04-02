@@ -24,4 +24,7 @@ WriteMakefile(
     'File::chdir' => '0.1010',
     'Capture::Tiny' => '0.27',
   },
+  TEST_REQUIRES => {
+    'CPAN::Uploader' => '0.103013',
+  }
 );
