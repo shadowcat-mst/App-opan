@@ -270,7 +270,7 @@ foreach my $cmd (
 
 use Mojolicious::Lite;
 
-Mojo::IOLoop->recurring(600 => sub { do_pull(app); });
+Mojo::IOLoop->recurring(600 => sub { do_pull(app); }) if $ENV{OPAN_RECURRING_PULL};
 
 post "/upload" => sub {
   my $c = shift;
@@ -632,6 +632,11 @@ To enable the /upload endpoint, set the ENV var OPAN_AUTH_TOKENS to a colon
 separated list of accepted tokens for uploads. This will allow a post with a
 'file' upload argument, checking http basic auth password against the provided
 auth tokens.
+
+=head2 recurring pull
+
+Set ENV OPAN_RECURRING_PULL to a true value to make opan automatically pull
+from upstream every 600 seconds
 
 =head1 AUTHOR
 
