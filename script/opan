@@ -643,11 +643,13 @@ Matt S. Trout (mst) <mst@shadowcat.co.uk>
 
 =head1 CONTRIBUTORS
 
-None yet, but I'm sure there'll be enough bugs for that to change shortly.
+Aaron Crane (arc) <arc@cpan.org>
+
+Marcus Ramburg (marcus) <marcus.ramberg@gmail.com>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2016 the L<App::opan> L</AUTHOR> and L</CONTRIBUTORS>
+Copyright (c) 2016-2018 the L<App::opan> L</AUTHOR> and L</CONTRIBUTORS>
 as listed above.
 
 =head1 LICENSE

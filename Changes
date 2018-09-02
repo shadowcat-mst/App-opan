@@ -1,5 +1,6 @@
 Revision history for App-opan
 
+  - Use gzip instead of zcat because Mac OS X's zcat is bizarre
   - Refactor to use more Mojo::File
   - Added token protected upload endpoint with CPAN::Uploader compat
   - Added periodic updater.
