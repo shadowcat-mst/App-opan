@@ -1,5 +1,8 @@
 Revision history for App-opan
 
+  - Document OPAN_MIRROR
+  - Remove big scary warning
+
 0.003001 - 2018-10-18
   - Serve 02packages for all pans for easier introspection
 
