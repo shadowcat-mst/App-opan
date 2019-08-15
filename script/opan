@@ -16,6 +16,14 @@ use Import::Into;
 
 our %TOKENS = map { $_=>1 } split/:/, $ENV{OPAN_AUTH_TOKENS} || '';
 
+sub cpan_fetch {
+  my $app = shift;
+  my $url = Mojo::URL->new(shift)->to_abs($app->cpan_url);
+  my $tx = $app->ua->get($url);
+  return $tx->res unless my $err = $tx->error;
+  die sprintf "%s %s: %s\n", $tx->req->method, $url, $err->{message};
+}
+
 sub packages_header {
   my ($count) = @_;
   (my $str = <<"  HEADER") =~ s/^    //mg;
@@ -137,8 +145,7 @@ sub do_init {
 sub do_fetch {
   my ($app) = @_;
   path('pans/upstream/index.gz')->spurt(
-    $app->ua->get($app->cpan_url.'modules/02packages.details.txt.gz')
-        ->res->body
+    cpan_fetch($app, 'modules/02packages.details.txt.gz')->body
   );
   path('pans/upstream/index')->spurt(
     scalar capture qw(gzip -dc), 'pans/upstream/index.gz'
@@ -184,11 +191,9 @@ sub do_pin {
   my ($app, $path_arg) = @_;
   $path_arg =~ /^(([A-Z])[A-Z])[A-Z]/ and $path_arg = join('/', $2, $1, $path_arg);
   my $path = path($path_arg);
+  my $res = cpan_fetch($app, "authors/id/$path");
   path("pans/pinset/dists/")->child($path->dirname)->make_path;
-  my $pan_path = path("pans/pinset/dists/${path}")->spurt(
-    $app->ua->get($app->cpan_url.'authors/id/'.$path)->res->body
-  );
-  add_dist_to_index('pans/pinset/index', $pan_path);
+  add_dist_to_index('pans/pinset/index', path("pans/pinset/dists/$path")->spurt($res->body));
 }
 
 sub do_unpin {
@@ -293,7 +298,7 @@ post "/upload" => sub {
 
 push(@{app->commands->namespaces}, 'App::opan::Command');
 
-helper cpan_url => sub { $ENV{OPAN_MIRROR} || 'http://www.cpan.org/' };
+helper cpan_url => sub { Mojo::URL->new($ENV{OPAN_MIRROR} || 'http://www.cpan.org/') };
 
 my $nopin_static = Mojolicious::Static->new(
   paths => [ 'pans/custom/dists' ]
