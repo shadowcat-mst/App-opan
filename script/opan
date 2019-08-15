@@ -44,6 +44,24 @@ sub extract_provides_from_tarball {
   Dist::Metadata->new(file => $tarball)->package_versions;
 }
 
+sub pod_section {
+  my ($cmd, $for_description) = @_;
+  my $fh = fopen __FILE__;
+
+  my $pod = '';
+  while (<$fh>) { /^=head3 $cmd\s*$/ && last }
+  while (<$fh>) { /^=head/ && last || ($pod .= $_) }
+
+  if ($for_description) {
+    $pod = $pod =~ m!\n(\S+.*?\.)(?:\s|$)!s ? $1 : "$0 $cmd --help for more info";
+    $pod =~ s![\n\r]+! !g;
+    $pod =~ s![\s\.]+$!!;
+  }
+
+  $pod =~ s!\b[CIL]<\/?([^>]+)\>!$1!g; # Remove C<...> pod notation
+  return $pod;
+}
+
 sub provides_to_packages_entries {
   my ($path, $provides) = @_;
   # <@mst> ok, I officially have no idea what order 02packages is actually in
@@ -269,6 +287,8 @@ foreach my $cmd (
   my $pkg = "App::opan::Command::${cmd}";
   my $code = __PACKAGE__->can("do_${cmd}");
   Mojo::Base->import::into($pkg, 'Mojolicious::Command');
+  monkey_patch $pkg, description => sub { pod_section($cmd, 1) };
+  monkey_patch $pkg, usage => sub { pod_section($cmd, 0) };
   monkey_patch $pkg,
     run => sub { my $self = shift; $code->($self->app, @_) };
 }
@@ -514,7 +534,7 @@ Rebuilds the L</combined> and L</nopin> PANs' index files.
 
   opan pull
 
-Does an L</fetch> then an L</merge>. There's no equivalent for others,
+Does a L</fetch> and then a L</merge>. There's no equivalent for others,
 on the assumption what you'll do is roughly L</pin>, L</add>, L</unpin>,
 L</unadd>, ... repeat ..., L</pull>.
 
@@ -553,7 +573,7 @@ Runs a request against the opan URL space using L<Mojolicious::Command::get>.
 
   opan cpanm --installdeps .
 
-Starts a temporary server process and runs
+Starts a temporary server process and runs cpanm.
 
   cpanm --mirror http://localhost:<port>/combined/ --mirror-only <your args here>
 
@@ -569,7 +589,7 @@ to request a specific PAN.
 
   opan carton install
 
-Starts a temporary server process and runs
+Starts a temporary server process and runs carton.
 
   PERL_CARTON_MIRROR=http://localhost:<port>/combined/ carton <your args here>
 
