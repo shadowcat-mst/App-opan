@@ -4,7 +4,7 @@ use ExtUtils::MakeMaker;
 
 use 5.008000;
 
-(do 'maint/Makefile.PL.include' or die $@) unless -f 'META.yml';
+(do './maint/Makefile.PL.include' or die $@) unless -f 'META.yml';
 
 WriteMakefile(
   NAME => 'App::opan',
