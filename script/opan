@@ -654,6 +654,10 @@ provided auth tokens.
 Each token is a base64 encoded username:password as sent in the Authorization:
 Basic http header.
 
+To upload a tarball you can for example use curl:
+
+curl --user username:password -F "dist=@My-Dist-1.23.tar.gz"
+
 =head2 recurring pull
 
 Set ENV OPAN_RECURRING_PULL to a true value to make opan automatically pull
