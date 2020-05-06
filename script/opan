@@ -648,7 +648,7 @@ specified you wanted that).
 
 To enable the /upload endpoint, set the ENV var OPAN_AUTH_TOKENS to a colon
 separated list of accepted tokens for uploads. This will allow a post with a
-'file' upload argument, checking http basic auth password against the provided
+'dist' upload argument, checking http basic auth password against the provided
 auth tokens.
 
 =head2 recurring pull
