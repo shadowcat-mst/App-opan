@@ -1,6 +1,9 @@
 Revision history for App-opan
 
   - Fix upload argument name in docs
+  - Fix upload authentication vulnerability
+    only checked password, not username
+    This required to change the OPAN_AUTH_TOKENS, see the docs for details
 
 0.003002 - 2019-05-09
   - Document OPAN_MIRROR
