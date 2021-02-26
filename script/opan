@@ -349,7 +349,7 @@ my $serve_upstream = sub {
   my ($c) = @_;
   $c->render_later;
   $c->ua->get(
-    $c->cpan_url.'authors/id/'.$c->stash->{path},
+    $c->cpan_url.'authors/id/'.$c->stash->{modpath},
       sub {
       my (undef, $tx) = @_;
         $c->tx->res($tx->res);
@@ -359,14 +359,14 @@ my $serve_upstream = sub {
   return;
 };
 
-get '/upstream/authors/id/*path' => $serve_upstream;
+get '/upstream/authors/id/*modpath' => $serve_upstream;
 
-get '/combined/authors/id/*path' => sub {
-  $combined_static->dispatch($_[0]) or $serve_upstream->($_[0]);
+get '/combined/authors/id/*modpath' => sub {
+  $combined_static->dispatch($_[0]->stash(path => $_[0]->stash->{modpath})) or $serve_upstream->($_[0]);
 };
 
-get '/nopin/authors/id/*path' => sub {
-  $nopin_static->dispatch($_[0]) or $serve_upstream->($_[0]);
+get '/nopin/authors/id/*modpath' => sub {
+  $nopin_static->dispatch($_[0]->stash(path => $_[0]->stash->{modpath})) or $serve_upstream->($_[0]);
 };
 
 get "/autopin/modules/02packages.details.txt" => sub {
@@ -381,10 +381,10 @@ get "/autopin/modules/02packages.details.txt.gz" => sub {
   $base_static->dispatch($_[0]->stash(path => "nopin/index.gz"));
 };
 
-get '/autopin/authors/id/*path' => sub {
+get '/autopin/authors/id/*modpath' => sub {
   return $_[0]->render(text => 'Autopin off', status => 404)
     unless $ENV{OPAN_AUTOPIN};
-  return if $nopin_static->dispatch($_[0]);
+  return if $nopin_static->dispatch($_[0]->stash(path => $_[0]->stash->{modpath}));
   return if eval {
     do_pin(app, $_[0]->stash->{path});
     $pinset_static->dispatch($_[0]);
