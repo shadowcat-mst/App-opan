@@ -338,11 +338,11 @@ my $base_static = Mojolicious::Static->new(
 );
 
 foreach my $pan (qw(upstream nopin combined pinset custom)) {
-  get "/${pan}/modules/02packages.details.txt" => sub {
-    $base_static->dispatch($_[0]->stash(path => "${pan}/index"));
-  };
   get "/${pan}/modules/02packages.details.txt.gz" => sub {
     $base_static->dispatch($_[0]->stash(path => "${pan}/index.gz"));
+  };
+  get "/${pan}/modules/02packages.details.txt" => sub {
+    $base_static->dispatch($_[0]->stash(path => "${pan}/index"));
   };
 }
 
