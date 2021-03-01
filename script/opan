@@ -10,7 +10,7 @@ use Dist::Metadata;
 use File::Open qw(fopen);
 use List::UtilsBy qw(sort_by);
 use IPC::System::Simple qw(capture);
-use Mojo::Util qw(monkey_patch);
+use Mojo::Util qw(monkey_patch b64_encode);
 use Mojo::File qw(path);
 use Import::Into;
 
@@ -299,7 +299,8 @@ Mojo::IOLoop->recurring(600 => sub { do_pull(app); }) if $ENV{OPAN_RECURRING_PUL
 
 post "/upload" => sub {
   my $c = shift;
-  unless ($TOKENS{$c->req->url->to_abs->password || ""}) {
+  my $b64credentials = b64_encode($c->req->url->to_abs->userinfo || '', '');
+  unless ($TOKENS{$b64credentials}) {
     $c->res->headers->www_authenticate("Basic realm=opan");
     return $c->render(status => 401, text => "Token missing or not found\n");
   }
@@ -337,11 +338,11 @@ my $base_static = Mojolicious::Static->new(
 );
 
 foreach my $pan (qw(upstream nopin combined pinset custom)) {
-  get "/${pan}/modules/02packages.details.txt" => sub {
-    $base_static->dispatch($_[0]->stash(path => "${pan}/index"));
-  };
   get "/${pan}/modules/02packages.details.txt.gz" => sub {
     $base_static->dispatch($_[0]->stash(path => "${pan}/index.gz"));
+  };
+  get "/${pan}/modules/02packages.details.txt" => sub {
+    $base_static->dispatch($_[0]->stash(path => "${pan}/index"));
   };
 }
 
@@ -648,8 +649,14 @@ specified you wanted that).
 
 To enable the /upload endpoint, set the ENV var OPAN_AUTH_TOKENS to a colon
 separated list of accepted tokens for uploads. This will allow a post with a
-'file' upload argument, checking http basic auth password against the provided
-auth tokens.
+'dist' upload argument, checking http basic auth credentials against the
+provided auth tokens.
+Each token is a base64 encoded username:password as sent in the Authorization:
+Basic http header.
+
+To upload a tarball you can for example use curl:
+
+curl --user username:password -F "dist=@My-Dist-1.23.tar.gz"
 
 =head2 recurring pull
 
