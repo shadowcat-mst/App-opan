@@ -1,5 +1,6 @@
 Revision history for App-opan
 
+  - Bump Mojolicious dep to avoid 'format' footgun
   - Fixup routing names for Mojolicious 9+
 
 0.003002 - 2019-05-09
