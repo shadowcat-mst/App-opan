@@ -1,5 +1,7 @@
 Revision history for App-opan
 
+  - Switch default cpan URL to https for security
+
 0.003003 - 2021-03-21
   - Bump Mojolicious dep to avoid 'format' footgun
   - Fixup routing names for Mojolicious 9+
