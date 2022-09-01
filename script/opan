@@ -394,7 +394,7 @@ get '/autopin/authors/id/*dist_path' => sub {
   return $_[0]->render(text => 'Not found', status => 404);
 };
 
-caller() ? app : app->tap(sub { shift->log->level('fatal') })->start;
+caller() ? app : app->tap(sub { shift->log->level($ENV{MOJO_LOG_LEVEL} // 'fatal') })->start;
 
 =head1 NAME
 
