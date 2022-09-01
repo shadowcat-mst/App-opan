@@ -24,4 +24,14 @@ WriteMakefile(
     'File::chdir' => '0.1010',
     'Capture::Tiny' => '0.27',
   },
+  META_MERGE        => {
+    "meta-spec" => { version => 2 },
+    resources => {
+      repository => {
+          type => 'git',
+          url => 'https://github.com/shadowcat-mst/App-opan.git',
+          web => 'https://github.com/shadowcat-mst/App-opan',
+      },
+    },
+  },
 );

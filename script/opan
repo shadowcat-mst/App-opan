@@ -394,7 +394,7 @@ get '/autopin/authors/id/*dist_path' => sub {
   return $_[0]->render(text => 'Not found', status => 404);
 };
 
-caller() ? app : app->tap(sub { shift->log->level('fatal') })->start;
+caller() ? app : app->tap(sub { shift->log->level($ENV{OPAN_LOG_LEVEL} || 'fatal') })->start;
 
 =head1 NAME
 
@@ -664,6 +664,11 @@ Set the ENV var OPAN_MIRROR to specify a cpan mirror - the default is
 www.cpan.org. Remember that if you need to temporarily overlay your overlay
 but only for one user, there's nothing stopping you setting OPAN_MIRROR to
 another opan.
+
+=head2 logging
+
+The default log level is C<fatal>. Set the ENV var OPAN_LOG_LEVEL to one of
+the log levels accepted by L<Mojo::Log>, like C<warn>, C<info> or C<trace>.
 
 =head1 AUTHOR
 
